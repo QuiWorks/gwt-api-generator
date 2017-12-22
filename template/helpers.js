@@ -154,14 +154,8 @@ module.exports = {
     var cache = {};
 
     _.forEach(properties, function(item) {
-      // We consider as properties:
-      if (
-          // Items with the published tag (those defined in the properties section)
-          item.published ||
-          // Non function items
-          !item.private && item.type && !/function/i.test(item.type) ||
-          // Properties defined with customized get/set syntax
-          !item.type && cache[item.name] && cache[item.name].type) {
+
+        if(!item.inheritedFrom && item.privacy === 'public' && item.type){
 
         // defined with customized get/set, if we are here is because
         // this item.type is undefined and cached one has the correct type
@@ -175,9 +169,8 @@ module.exports = {
           ret.push(item);
           done[item.getter] = true;
         }
-      } else {
-        cache[item.name] = item;
       }
+
     }.bind(this));
     return ret;
   },
