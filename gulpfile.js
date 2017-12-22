@@ -80,11 +80,11 @@ gulp.task('parse', ['analyze'], function (cb) {
         }
 
         //remove private and unwanted properties
-        const unwantedProps = ['root','rootPath','importPath','$'];
+        const unwantedProps = ['root', 'rootPath', 'importPath', '$'];
         let props = [];
-        if(item.properties){
-            item.properties.forEach(function(prop){
-                if(!unwantedProps.includes(prop.name) && prop.privacy === "public"){
+        if (item.properties) {
+            item.properties.forEach(function (prop) {
+                if (!unwantedProps.includes(prop.name) && prop.privacy === "public") {
                     props.push(prop);
                 }
             });
@@ -125,20 +125,24 @@ gulp.task('analyze', ['clean:target', 'pre-analyze'], function () {
                 let jsonArray = _.union(result.elements, result.behaviors);
                 jsonArray.forEach(function (item) {
                     let path = file.relative.replace(/\\/, '/');
-                    if (item.name) {
-                        item.path = path;
 
-                        let bowerFile = file.base + path.split("/")[0] + "/bower.json";
-                        let bowerFileContent = fs.readFileSync(bowerFile);
-                        item.bowerData = bowerFileContent ? JSON.parse(bowerFileContent) : {};
-
-                        // Save all items in an array for later processing
-                        global.parsed.push(item);
+                    //poly1 and hybrid analysis doesn't have name prop
+                    if (!item.name) {
+                        item.name = _.camelCase(item.tagname);
+                        item.name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
                     }
+                    item.path = path;
+
+                    let bowerFile = file.base + path.split("/")[0] + "/bower.json";
+                    let bowerFileContent = fs.readFileSync(bowerFile);
+                    item.bowerData = bowerFileContent ? JSON.parse(bowerFileContent) : {};
+
+                    // Save all items in an array for later processing
+                    global.parsed.push(item);
                 });
                 cb(null, file);
             })
-            ['catch'](function (e) {
+                ['catch'](function (e) {
                 gutil.log(e.stack);
                 cb(null, file);
             });
