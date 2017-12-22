@@ -172,21 +172,13 @@ function parseTemplate(template, obj, name, dir, suffix) {
 
     obj.ns = globalVar.ns + '.' + prefix;
 
+    if(obj.superclass === 'Polymer.Element' || obj.superclass === 'HTMLElement'){
+        obj.superclass = 'Polymer';
+    }
+
     var targetPath = globalVar.clientDir + prefix + '/' + dir;
     var targetFile = targetPath + className + ".java";
     fs.ensureFileSync(targetFile);
-
-    var baseFile = libDir + globalVar.nspath + '/' + prefix + '/' + dir + classBase + ".java";
-    if (!fs.existsSync(baseFile)) {
-        var baseFile = './lib/' + globalVar.nspath + '/' + prefix + '/' + dir + classBase + ".java";
-    }
-    if (fs.existsSync(baseFile)) {
-        obj.base = classBase;
-        gutil.log("Copying: ", baseFile);
-        fs.copySync(baseFile, targetPath + classBase + ".java");
-    } else {
-        obj.base = '';
-    }
 
     gutil.log("Generating: ", targetFile);
     var tpl = _.template(fs.readFileSync(tplDir + template + '.template'));

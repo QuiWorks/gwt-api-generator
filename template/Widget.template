@@ -19,7 +19,7 @@ import jsinterop.base.Js;
 /**
  * <%= getDescription(' ') %>
  */
-public class <%= className() %> extends <%= base ? base : 'PolymerWidget' %> {
+public class <%= className() %> extends <%= superclass !== 'Polymer' ? superclass : 'PolymerWidget' %> {
     /**
      * Default Constructor.
      */
