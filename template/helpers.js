@@ -200,37 +200,23 @@ module.exports = {
   computeSignature: function(method) {
     return method.replace(/\s+\w+\s*([,\)])/g, '$1');
   },
-  getMethods: function(properties) {
-    // Sorting properties so Object methods are at first
-    properties.sort(function(a, b) {
+  getMethods: function(methods) {
+    // Sorting methods so Object methods are at first
+    methods.sort(function(a, b) {
       var t1 = this.typedParamsString(a);
       var t2 = this.typedParamsString(b);
       return t1 == t2 ? 0: /^Object/.test(t1) ? -1 : 1;
     }.bind(this));
 
-    // Skip functions with name equal to a getter/setter
-    var gsetters = {};
-    _.forEach(properties, function(item) {
-      if (item.getter) {
-        gsetters[item.getter] = true;
-        gsetters[item.setter] = true;
-        gsetters[item.name] = true;
-      }
-    }.bind(this));
-
     var ret = [];
     var done = {};
-    _.forEach(properties, function(item) {
-      if (!gsetters[item.name] && !item.getter && !item.private && !item.published && /function/i.test(item.type)) {
-        item.method = item.method || item.name + '(' + this.typedParamsString(item) + ')';
-        // JsInterop + SDM do not support method overloading if one signature is object
-        var other = item.method.replace(/String/, 'Object');
-        var signature = this.computeSignature(item.method);
-        var other_sig = this.computeSignature(other);
-        if (!gsetters[signature] && !done[signature] && !done[other_sig]) {
-          ret.push(item);
-          done[signature] = true;
-        }
+    _.forEach(methods, function(item) {
+      if (item.privacy === 'public' && !item.name.startsWith('_',0) && !item.inheritedFrom) {
+        item.method = item.name + '(' + this.typedParamsString(item) + ')';
+
+        //todo JsInterop + SDM do not support method overloading if one signature is object
+
+        ret.push(item);
       }
     }.bind(this));
     return ret;

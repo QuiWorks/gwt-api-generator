@@ -41,7 +41,7 @@ public class <%= elementClassName() %> extends <%= base ? base : 'PolymerElement
      */
     @JsProperty public native <%= computeGenericType(item.type) %> void <%= item.setter %>;
 <% }); %>
-<% _.forEach(getMethods(properties), function(item) { %>
+<% _.forEach(getMethods(methods), function(item) { %>
     /**
      * <%= getDescription('     ', item) %>
      *
