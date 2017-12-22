@@ -110,12 +110,16 @@ gulp.task('analyze', ['clean:target', 'pre-analyze'], function () {
         "!" + globalVar.bowerDir + "*/iron-doc*.html",
     ])
         .pipe(map(function (file, cb) {
+            const componentLocation = file.relative.split('/');
+            const componentDirectory = componentLocation[0];
+            const componentFile = componentLocation[1];
+
             let analyzer = new Analyzer({
-                urlLoader: new FSUrlLoader('bower_components/')
+                urlLoader: new FSUrlLoader(file.base + componentDirectory + "/")
             });
 
             // This path is relative to the package root
-            analyzer.analyze([file.relative]).then((analysis) => {
+            analyzer.analyze([componentFile]).then((analysis) => {
 
                 let result = generateAnalysis(analysis, '');
                 let jsonArray = _.union(result.elements, result.behaviors);
