@@ -204,7 +204,7 @@ module.exports = {
     var ret = [];
     var done = {};
     _.forEach(methods, function(item) {
-      if (item.privacy === 'public' && !item.name.startsWith('_',0) && !item.inheritedFrom) {
+      if (item.privacy === 'public' && !item.name.startsWith('_',0) && !item.inheritedFrom && !item.duplicate) {
         item.method = item.name + '(' + this.typedParamsString(item) + ')';
 
         //todo JsInterop + SDM do not support method overloading if one signature is object

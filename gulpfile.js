@@ -185,6 +185,16 @@ function parseTemplate(template, obj, name, dir, suffix) {
 
     obj.ns = globalVar.ns + '.' + prefix;
 
+    let propertyNames = [];
+    obj.properties.forEach(function(prop){
+       propertyNames.push(prop.name);
+    });
+    obj.methods.forEach(function(method){
+       if(propertyNames.includes(_.lowerFirst(method.name.replace(/get/,'').replace(/set/,'')))){
+           method.duplicate = true;
+       }
+    });
+
     if(obj.superclass === 'Polymer.Element' || obj.superclass === 'HTMLElement'){
         obj.superclass = 'Polymer';
     }
