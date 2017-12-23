@@ -35,6 +35,13 @@ public class <%= className() %> extends <%= superclass !== 'Polymer' ? superclas
     }
 
     /**
+     * Constructor used by widgets that extend this widget.
+     */
+    public <%= className() %>(String tag, String src, String html) {
+        super(tag, src, html);
+    }
+
+    /**
      * Gets a handle to the Polymer object's underlying DOM element.
      */
     public <%= elementClassName() %> getPolymerElement() {
