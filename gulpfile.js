@@ -122,7 +122,17 @@ gulp.task('analyze', ['clean:target', 'pre-analyze'], function () {
             analyzer.analyze([componentFile]).then((analysis) => {
 
                 let result = generateAnalysis(analysis, '');
-                let jsonArray = _.union(result.elements, result.behaviors);
+
+                let behaviors = [];
+                if(result.metadata && result.metadata.polymer && result.metadata.polymer.behaviors){
+                    result.metadata.polymer.behaviors.forEach(function(behavior){
+                        behavior.type = 'behavior';
+                    });
+                    behaviors = result.metadata.polymer.behaviors;
+                }
+
+                let jsonArray = _.union(result.elements, behaviors);
+
                 jsonArray.forEach(function (item) {
                     let path = file.relative.replace(/\\/, '/');
 
@@ -131,6 +141,9 @@ gulp.task('analyze', ['clean:target', 'pre-analyze'], function () {
                         item.name = _.camelCase(item.tagname);
                         item.name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
                     }
+
+                    item.name = item.name.replace(/Polymer\./, '');
+
                     item.path = path;
 
                     let bowerFile = file.base + path.split("/")[0] + "/bower.json";
