@@ -118,47 +118,49 @@ gulp.task('analyze', ['clean:target', 'pre-analyze'], function () {
                 urlLoader: new FSUrlLoader(file.base + componentDirectory + "/")
             });
 
-            // This path is relative to the package root
-            analyzer.analyze([componentFile]).then((analysis) => {
+            if (componentDirectory !== 'polymer') {
+                // This path is relative to the package root
+                analyzer.analyze([componentFile]).then((analysis) => {
 
-                let result = generateAnalysis(analysis, '');
+                    let result = generateAnalysis(analysis, '');
 
-                let behaviors = [];
-                if(result.metadata && result.metadata.polymer && result.metadata.polymer.behaviors){
-                    result.metadata.polymer.behaviors.forEach(function(behavior){
-                        behavior.type = 'behavior';
-                    });
-                    behaviors = result.metadata.polymer.behaviors;
-                }
-
-                let jsonArray = _.union(result.elements, behaviors);
-
-                jsonArray.forEach(function (item) {
-                    let path = file.relative.replace(/\\/, '/');
-
-                    //poly1 and hybrid analysis doesn't have name prop
-                    if (!item.name) {
-                        item.name = _.camelCase(item.tagname);
-                        item.name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
+                    let behaviors = [];
+                    if (result.metadata && result.metadata.polymer && result.metadata.polymer.behaviors) {
+                        result.metadata.polymer.behaviors.forEach(function (behavior) {
+                            behavior.type = 'behavior';
+                        });
+                        behaviors = result.metadata.polymer.behaviors;
                     }
 
-                    item.name = item.name.replace(/Polymer\./, '');
+                    let jsonArray = _.union(result.elements, behaviors);
 
-                    item.path = path;
+                    jsonArray.forEach(function (item) {
+                        let path = file.relative.replace(/\\/, '/');
 
-                    let bowerFile = file.base + path.split("/")[0] + "/bower.json";
-                    let bowerFileContent = fs.readFileSync(bowerFile);
-                    item.bowerData = bowerFileContent ? JSON.parse(bowerFileContent) : {};
+                        //poly1 and hybrid analysis doesn't have name prop
+                        if (!item.name) {
+                            item.name = _.camelCase(item.tagname);
+                            item.name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
+                        }
 
-                    // Save all items in an array for later processing
-                    global.parsed.push(item);
+                        item.name = item.name.replace(/Polymer\./, '');
+
+                        item.path = path;
+
+                        let bowerFile = file.base + path.split("/")[0] + "/bower.json";
+                        let bowerFileContent = fs.readFileSync(bowerFile);
+                        item.bowerData = bowerFileContent ? JSON.parse(bowerFileContent) : {};
+
+                        // Save all items in an array for later processing
+                        global.parsed.push(item);
+                    });
+                    cb(null, file);
+                })
+                    ['catch'](function (e) {
+                    gutil.log(e.stack);
+                    cb(null, file);
                 });
-                cb(null, file);
-            })
-                ['catch'](function (e) {
-                gutil.log(e.stack);
-                cb(null, file);
-            });
+            }
         }));
 });
 
@@ -186,16 +188,16 @@ function parseTemplate(template, obj, name, dir, suffix) {
     obj.ns = globalVar.ns + '.' + prefix;
 
     let propertyNames = [];
-    obj.properties.forEach(function(prop){
-       propertyNames.push(prop.name);
+    obj.properties.forEach(function (prop) {
+        propertyNames.push(prop.name);
     });
-    obj.methods.forEach(function(method){
-       if(propertyNames.includes(_.lowerFirst(method.name.replace(/get/,'').replace(/set/,'')))){
-           method.duplicate = true;
-       }
+    obj.methods.forEach(function (method) {
+        if (propertyNames.includes(_.lowerFirst(method.name.replace(/get/, '').replace(/set/, '')))) {
+            method.duplicate = true;
+        }
     });
 
-    if(obj.superclass === 'Polymer.Element' || obj.superclass === 'HTMLElement'){
+    if (obj.superclass === 'Polymer.Element' || obj.superclass === 'HTMLElement') {
         obj.superclass = 'Polymer';
     }
 
